@@ -27,7 +27,7 @@ def main():
     # TO DO:
     # Further filtering params, TIME, DAY
 
-    pooling = input("\nPool for results upon changes?\n(Y/N): ").lower()
+    pooling = input("\nPoll for results upon changes?\n(Y/N): ").lower()
 
     if pooling == "y":
 
