@@ -1,5 +1,6 @@
 """Scrape Play.fi website for available tennis / padel slots"""
 
+from functools import wraps
 import os
 from time import sleep
 from datetime import datetime, timedelta
@@ -27,7 +28,7 @@ def main():
     # TO DO:
     # Further filtering params, TIME, DAY
 
-    pooling = input("\nPoll for results upon changes?\n(Y/N): ").lower()
+    pooling = input("\nPoll for new results upon changes?\n(Y/N): ").lower()
 
     if pooling == "y":
 
@@ -86,7 +87,8 @@ def ask_for_user_input(lajit: list, kentät: list, kaupungit: list) -> list:
     for idx, laji in enumerate(lajit, 1):
         print(f"\t{idx}: {list(laji.keys())[0].title()}")
 
-    laji = input("\nActivity #: ").lower()
+    # laji = input("\nActivity #: ").lower()
+    laji = validate_numerical_input("\nLaji #: ", lajit, int)
 
     clear_console()
 
@@ -106,7 +108,8 @@ def ask_for_user_input(lajit: list, kentät: list, kaupungit: list) -> list:
         cities_filttered_dict[idx] = kaupunki
         print(f"\t{idx}: {kaupunki.title()}")
 
-    kaupunki_input = int(input("\nCity #: "))
+    # kaupunki_input = int(input("\nCity #: "))
+    kaupunki_input = validate_numerical_input("\nCity #: ", cities_filttered, int)
     kaupunki_selected = cities_filttered_dict[kaupunki_input].lower()
 
     kaupunki_value = ""
@@ -142,8 +145,31 @@ def retrieve_possible_playgrounds(laji, kaupunki=""):
     return venues
 
 
-def validate_input(l: list):
-    pass
+def validate_numerical_input(prompt: str, l, type_=None, min_input=1, max_input=14):
+
+    while True:
+        if type_ is not None:
+            try:
+                user_input = type_(input(prompt))
+            except ValueError:
+                print(f"Input type must be of {type_.__name__}")
+                continue
+
+            if l is not None:
+                list_elems_as_num = list(range(1, len(l) + 1))
+                if user_input not in list_elems_as_num:
+                    print(
+                        f"Invalid input. Please provide a number between {list_elems_as_num[0]} .. {list_elems_as_num[-1]}"
+                    )
+                    continue
+            else:
+                if user_input not in range(min_input, max_input + 1):
+                    print(
+                        f"Invalid input. Please provide a number between {min_input} .. {max_input}"
+                    )
+                    continue
+
+            return user_input
 
 
 def select_venues(venues: list) -> list:
@@ -154,7 +180,7 @@ def select_venues(venues: list) -> list:
             venue_dic[idx] = [k, v]
             print(f"\t{idx}: {venue}")
 
-    venue_selected = int(input("\nVenue #: "))
+    venue_selected = validate_numerical_input("\nVenue #: ", venues, int)
 
     return venue_dic[venue_selected]
 
@@ -207,12 +233,12 @@ def fectch_and_process_data_from_url(venue_list: list, pooling=False) -> list:
             activities_dict[idx] = activity
 
         print("\nSelect activity according to your initial selection\n")
-        activity_input = int(input("Activity #: "))
+        # activity_input = int(input("Activity #: "))
+        activity_input = validate_numerical_input("Activity #: ", activities, int)
         activity = activities_dict[activity_input]
 
-        number_of_days = 0
-        number_of_days = int(
-            input("\nProvide number of days to lookahead, 0 = today\n# of days: ")
+        number_of_days = validate_numerical_input(
+            "\nProvide number of days to lookahead, 1 = today\n# of days: ", None, int
         )
 
         PARAMS["num_of_days"] = number_of_days
@@ -256,6 +282,33 @@ def clear_console():
     if os.name in ("nt", "dos"):  # If Machine is running on Windows, use cls
         command = "cls"
     os.system(command)
+
+
+# def retry_on(exceptions, times, sleep_sec=1):
+#     """
+#     usage:
+#     @retry_on((AttributeError,), 2, 1)    <--- retries if AttributeError was thrown else throws an expection.
+#     def func_to_try_on():
+#         pass
+#     """
+
+#     def decorator(func):
+#         @wraps(func)
+#         def wrapper(*args, **kwargs):
+#             last_exception = None
+#             for _ in range(times):
+#                 try:
+#                     return func(*args, **kwargs)
+#                 except Exception as e:
+#                     last_exception = e
+#                     if not isinstance(e, exceptions):
+#                         raise  # re-raises unexpected exceptions
+#                     sleep(sleep_sec)
+#             raise last_exception
+
+#         return wrapper
+
+#     return decorator
 
 
 if __name__ == "__main__":
