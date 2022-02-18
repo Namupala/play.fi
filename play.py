@@ -1,9 +1,12 @@
 """Scrape Play.fi website for available tennis / padel slots"""
 
-from functools import wraps
+from ast import arg
 import os
+import argparse
 from time import sleep
 from datetime import datetime, timedelta
+
+# from functools import wraps
 
 from bs4 import BeautifulSoup
 import requests
@@ -15,6 +18,27 @@ pd.options.display.max_rows = 100
 TODAY = datetime.today()
 AVAILABLE_SLOTS = []
 PARAMS = {}
+
+
+def parse_args():
+    """Get user command line arguments"""
+    parser = argparse.ArgumentParser(description="Available options:")
+    parser.add_argument(
+        "-s",
+        "--start",
+        type=int,
+        dest="start",
+        help="Earliest start time of your activity. Used to filter desired results.",
+    )
+    parser.add_argument(
+        "-e",
+        "--end",
+        type=int,
+        help="Lastest start time of your activity, filters results.",
+    )
+
+    args = parser.parse_args()
+    return args
 
 
 def main():
@@ -185,7 +209,18 @@ def select_venues(venues: list) -> list:
     return venue_dic[venue_selected]
 
 
-def filter_results(start=17, end=20):
+def filter_results(start=0, end=99):
+    """Filter results based on earliest and lastest time. By default does not filter results.
+    Adjust time filtering with argparse -s --start.
+
+    -s 10 results in a list where earliest start time of your activity is at 10:00 AM
+    -e 20 latest time 20:30 PM. Only takes into account full hours, not 0,5h."""
+
+    if args.start is not None:
+        start = args.start
+
+    if args.end is not None:
+        end = args.end
 
     filttered_results = [
         slot for slot in AVAILABLE_SLOTS if start <= int(slot["Time"][:2]) <= end
@@ -206,6 +241,7 @@ def prettify_results(filttered_results):
 
 
 def fectch_and_process_data_from_url(venue_list: list, pooling=False) -> list:
+    """NOTE: filters out 30min slots. Only 1h slots are considered."""
     place = venue_list[0].replace(",", "")
     url_string = venue_list[1]
 
@@ -233,7 +269,8 @@ def fectch_and_process_data_from_url(venue_list: list, pooling=False) -> list:
             print(f"{idx}: {activity}")
             activities_dict[idx] = activity
 
-        print("\nSelect activity.\n")
+        print("\nSelect activity according to your initial selection\n")
+        # activity_input = int(input("Activity #: "))
         activity_input = validate_numerical_input("Activity #: ", activities, int)
         activity = activities_dict[activity_input]
 
@@ -313,4 +350,5 @@ def clear_console():
 
 if __name__ == "__main__":
     clear_console()
+    args = parse_args()
     main()
