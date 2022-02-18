@@ -220,11 +220,12 @@ def fectch_and_process_data_from_url(venue_list: list, pooling=False) -> list:
         soup = BeautifulSoup(page.text, "html.parser")
         table = soup.find("table")
 
-        activities = (
-            soup.find("div", attrs={"id": "w0", "class": "tabs__items"})
-            .text.strip()
-            .split()
-        )
+        activities = [
+            a.text
+            for a in soup.find(
+                "div", attrs={"id": "w0", "class": "tabs__items"}
+            ).find_all("a")
+        ]
 
         activities_dict = dict()
         print()
@@ -232,8 +233,7 @@ def fectch_and_process_data_from_url(venue_list: list, pooling=False) -> list:
             print(f"{idx}: {activity}")
             activities_dict[idx] = activity
 
-        print("\nSelect activity according to your initial selection\n")
-        # activity_input = int(input("Activity #: "))
+        print("\nSelect activity.\n")
         activity_input = validate_numerical_input("Activity #: ", activities, int)
         activity = activities_dict[activity_input]
 
