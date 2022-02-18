@@ -26,7 +26,6 @@ def parse_args():
         "-s",
         "--start",
         type=int,
-        dest="start",
         help="Earliest start time of your activity. Used to filter desired results.",
     )
     parser.add_argument(
@@ -110,7 +109,6 @@ def ask_for_user_input(lajit: list, kentät: list, kaupungit: list) -> list:
     for idx, laji in enumerate(lajit, 1):
         print(f"\t{idx}: {list(laji.keys())[0].title()}")
 
-    # laji = input("\nActivity #: ").lower()
     laji = validate_numerical_input("\nLaji #: ", lajit, int)
 
     clear_console()
@@ -131,7 +129,6 @@ def ask_for_user_input(lajit: list, kentät: list, kaupungit: list) -> list:
         cities_filttered_dict[idx] = kaupunki
         print(f"\t{idx}: {kaupunki.title()}")
 
-    # kaupunki_input = int(input("\nCity #: "))
     kaupunki_input = validate_numerical_input("\nCity #: ", cities_filttered, int)
     kaupunki_selected = cities_filttered_dict[kaupunki_input].lower()
 
@@ -268,7 +265,7 @@ def fectch_and_process_data_from_url(venue_list: list, pooling=False) -> list:
             print(f"{idx}: {activity}")
             activities_dict[idx] = activity
 
-        print("\nSelect activity according to your initial selection\n")
+        print("\nSelect activity.")
         # activity_input = int(input("Activity #: "))
         activity_input = validate_numerical_input("Activity #: ", activities, int)
         activity = activities_dict[activity_input]
