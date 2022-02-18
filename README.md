@@ -6,7 +6,7 @@ Reserving a shift for your favorite sport activity made easy.
 
     python play.py 
 
-Retrieves all available acitivty slots based upon inputs given by user.
+Retrieves all available >= 60 min acitivty slots based upon inputs given by user.
 
 Use command line arguments -s --start or -e --end to filter available slots based on start time.
     
