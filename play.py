@@ -1,6 +1,5 @@
 """Scrape Play.fi website for available tennis / padel slots"""
 
-from ast import arg
 import os
 import argparse
 from time import sleep
